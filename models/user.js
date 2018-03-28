@@ -17,7 +17,8 @@ var UserSchema = new Schema({
       default: Date.now
     },
     "score": {
-      type: Number
+      type: Number,
+      default: 0
     }
   }]
 });

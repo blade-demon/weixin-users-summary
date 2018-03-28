@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <!--[if lt IE 9]>
+  <script>
+    document.createElement('video');
+  </script>
+  <![endif]-->
+  <style>
+    * {
+      padding: 0;
+      margin: 0
+    }
+
+    video#bgvid {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      z-index: -100;
+      -ms-transform: translateX(-50%) translateY(-50%);
+      -moz-transform: translateX(-50%) translateY(-50%);
+      -webkit-transform: translateX(-50%) translateY(-50%);
+      transform: translateX(-50%) translateY(-50%);
+      background: no-repeat;
+      background-size: cover;
+      transition: 1s opacity;
+    }
+
+    .stopfade { opacity: .4; }
+
+    #vidpause {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      /*transform: translate(-50%, -50%);*/
+      background-color: white;
+      border-radius: 50%;
+      width: 5rem;
+      height: 5rem;
+    }
+
+    @media screen and (max-device-width: 800px) {
+      html {
+        background: #fff no-repeat center center fixed;
+      }
+
+      #bgvid {
+        display: none;
+      }
+
+      #vidpause {
+        left: 50%;
+        bottom: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border-radius: 50%;
+        width: 10rem;
+        height: 10rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<video autoplay muted loop poster="" id="bgvid">
+  <!--<source src="polina.webm" type="video/webm">-->
+  <source src="http://video.699pic.com/videos/32/50/93/47HK2MpfKwqx1510325093.mp4" type="video/mp4">
+</video>
+<button id="vidpause"></button>
+<script>
+  var vid = document.getElementById("bgvid"),
+    pauseButton = document.getElementById("vidpause");
+  if (window.matchMedia('(prefers-reduced-motion)').matches) {
+    vid.removeAttribute("autoplay");
+    vid.pause();
+    pauseButton.innerHTML = "Paused";
+  }
+
+  function vidFade() {
+    vid.classList.add("stopfade");
+  }
+
+  vid.addEventListener('ended', function () {
+    // only functional if "loop" is removed
+    vid.pause();
+    // to capture IE10
+    vidFade();
+  });
+  document.addEventListener("click", function () {
+    vid.classList.toggle("stopfade");
+    if (vid.paused) {
+      vid.play();
+      pauseButton.innerHTML = "Pause";
+    } else {
+      vid.pause();
+      pauseButton.innerHTML = "Paused";
+    }
+  })
+</script>
+</body>
+</html>

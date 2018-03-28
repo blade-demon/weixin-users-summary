@@ -22,13 +22,16 @@ router.route('/')
     };
     if (req.body.action == 'create') {
       delete req.body.action;
+      let scoreRecords = {};
       for (let key in req.body) {
         let tempData = req.body[key];
         key = key.replace('data[0]', '').replace('[', '').replace(']', '');
-        if (key == 'score')
-          tempData = Number(tempData);
+        if (key == 'score' || key == 'type')
+          scoreRecords[key] = tempData;
         user[key] = tempData;
       }
+      console.log(scoreRecords);
+      user.scoreRecords.push(scoreRecords);
       user = new User(user);
     } else {
       user = new User(req.body);
@@ -61,6 +64,7 @@ router.get('/formatted', async (req, res) => {
       });
 
       formattedUsers.push({
+        "_id": users[i]._id,
         "unionid": users[i].unionid,
         "headimg": users[i].headimg,
         "nickname": users[i].nickname,
@@ -68,7 +72,7 @@ router.get('/formatted', async (req, res) => {
         "totalScore": totalScore
       });
     }
-    res.status(200).send(formattedUsers);
+    res.status(200).json(formattedUsers);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -85,6 +89,19 @@ router.post('/insertMany', function (req, res) {
       return res.status(500).send(error);
     }
   });
+});
+
+router.post('/delete', async (req, res) => {
+  console.log(req.body);
+  var ids = req.body.idArray;
+  console.log(ids);
+  try {
+    await User.remove({"_id": {$in: ids}});
+    return res.status(200).send({});
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+
 });
 
 router.use('/:_id', function (req, res, next) {
@@ -119,17 +136,19 @@ router.route('/:_id')
   .patch(function (req, res) {
     if (req.body._id)
       delete req.body._id;
-    console.log(req.body);
     if (req.body.action == 'edit') {
       delete req.body.action;
+      console.log(req.body);
+      let scoreRecords = {};
       for (let key in req.body) {
         let tempData = req.body[key];
         key = key.slice(30).replace('[', '').replace(']', '');
-        if (key == 'score')
-          tempData = Number(tempData);
+        if (key == 'score' || key == 'type') {
+          scoreRecords[key] = tempData;
+        }
         req.user[key] = tempData;
-        console.log(req.user);
       }
+      req.user.scoreRecords.push(scoreRecords);
     } else {
       for (let p in req.body) {
         // if (req.user.hasOwnProperty(p)) {
@@ -137,8 +156,10 @@ router.route('/:_id')
         // }
       }
     }
+    console.log("修改后的数据是：", req.user);
     req.user.save().then(function (doc) {
-      res.json(req.user);
+      console.log("返回的数据是：", doc)
+      res.json(doc);
     }).catch(function (err) {
       console.log(err);
       res.status(500).send(err);
@@ -148,7 +169,7 @@ router.route('/:_id')
     console.log(req.body);
     console.log("删除");
     req.user.remove().then(function (err) {
-      res.status(204).send('Removed');
+      res.status(204).json({});
     }).catch(function () {
       res.status(500).send(err);
     });
